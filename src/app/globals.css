@@ -21,7 +21,7 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
 }
 
 body {
@@ -64,11 +64,12 @@ body {
 }
 
 .glow-card {
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .glow-card:hover {
   box-shadow: 0 0 30px rgba(0, 245, 212, 0.1), 0 0 60px rgba(124, 58, 237, 0.08);
+  transform: translateY(-2px);
 }
 
 .hero-glow {
@@ -87,8 +88,8 @@ body {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
 }
 
 .animate-float {
@@ -96,10 +97,51 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(0, 245, 212, 0.05), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes reveal-card {
+  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes gradient-shift {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(30deg); }
+  100% { filter: hue-rotate(0deg); }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 8s ease-in-out infinite;
+}
+
+@keyframes border-dance {
+  0% { border-color: rgba(0, 245, 212, 0.2); }
+  50% { border-color: rgba(124, 58, 237, 0.3); }
+  100% { border-color: rgba(0, 245, 212, 0.2); }
+}
+
+.animate-border {
+  animation: border-dance 4s ease-in-out infinite;
 }
