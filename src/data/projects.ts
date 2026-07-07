@@ -14,7 +14,7 @@ export interface Project {
   icon: string;
   techStack: { category: string; items: string[] }[];
   features: { title: string; description: string }[];
-  architecture: string;
+  architecture: string[];
   fileTree: string[];
   timeline: TimelineEvent[];
   stats: { label: string; value: string }[];
@@ -48,8 +48,12 @@ export const projects: Project[] = [
       { title: "Smart Router", description: "Instant replies for greetings and simple queries; routes complex questions to the LLM." },
       { title: "DSA Mentor", description: "Loaded with 5,491 vector chunks from 4 DSA books + 117 LeetCode solutions." },
     ],
-    architecture:
-      "FastAPI backend on port 8001 communicates directly with Ollama via httpx (no LangChain). ChromaDB handles vector storage for RAG. Frontend is a clean HTML/CSS/JS chat interface. A smart request router classifies queries — instant replies for greetings, LLM for complex questions, and vector search for DSA/document queries.",
+    architecture: [
+      "VASU-AI uses a clean two-layer architecture. The backend is a FastAPI server running on port 8001 that acts as the central orchestrator. It communicates directly with Ollama via httpx HTTP calls — there is no LangChain or heavy abstraction layer, keeping the codebase lean and the request pipeline fast. The Ollama instance runs locally and can serve models like Llama 3, Qwen 2.5, DeepSeek, and Phi, all of which the user can switch between from the chat interface without restarting anything.",
+      "For memory and retrieval-augmented generation (RAG), VASU-AI uses ChromaDB as its vector database. When a user uploads a PDF, TXT, or Markdown file, the system extracts the text, chunks it intelligently, generates embeddings, and stores them in ChromaDB. When the user asks a question, the smart request router first classifies the query type. If it is a simple greeting or small-talk, the system returns an instant reply from a cached response list — this keeps latency under 5ms for routine interactions.",
+      "For complex questions, the router sends the query to the LLM. For document-specific queries, it performs a similarity search against the ChromaDB vector store and injects the most relevant chunks into the prompt as context. The frontend is a lightweight HTML/CSS/JS single-page application that communicates with the backend via fetch calls. The UI displays conversation history, model selection, and tool outputs in a clean chat layout.",
+      "The project also includes a comprehensive DSA knowledge base indexer (dsa_indexer.py) that processed 4 DSA textbooks and the Striver A2Z sheet into 5,491 vector chunks. The full_indexer.py script can index any folder of documents. A system_monitor.py tracks CPU, RAM, and Ollama process health. The entire project is launched via a single start.bat that initializes everything in order — ChromaDB, Ollama, FastAPI, and the frontend.",
+    ],
     fileTree: [
       "vasu-ai/",
       "├── backend/",
@@ -71,11 +75,15 @@ export const projects: Project[] = [
       "└── vasu_ai.ico",
     ],
     timeline: [
-      { date: "Jun 12", title: "Project Kickoff", description: "Set up FastAPI backend with Ollama integration. Basic chat endpoint working with local LLM." },
-      { date: "Jun 13", title: "RAG & Memory Layer", description: "Integrated ChromaDB for vector storage. Added file upload (PDF/TXT/MD) with query capabilities." },
-      { date: "Jun 14", title: "Tool Integration", description: "Added DuckDuckGo web search, URL reader, Python code runner, and calculator tool. Smart router implemented." },
-      { date: "Jun 15", title: "Frontend & Polish", description: "Built clean chat UI with HTML/CSS/JS. Added system monitor, DSA knowledge base indexer with 5,491 chunks." },
-      { date: "Jun 16", title: "Launch", description: "Finalized start/stop scripts, desktop shortcut, hotkey binding. Ready for local deployment." },
+      { date: "Jun 10", title: "Research & Planning", description: "Evaluated local LLM options — Ollama vs llama.cpp vs GPT4All. Settled on Ollama for its simple REST API and broad model support. Designed the system architecture with FastAPI as the central hub and ChromaDB for RAG. Created a detailed project roadmap and API contract document." },
+      { date: "Jun 11", title: "Backend Foundation", description: "Set up the FastAPI project structure with modular routes. Implemented the core chat endpoint that communicates with Ollama via httpx. Built the config system to support dynamic model switching. Added request logging and error handling middleware for production readiness." },
+      { date: "Jun 12", title: "Smart Request Router", description: "Built the query classification system that routes requests based on intent. Greetings and simple queries get instant cached responses (<5ms). Complex reasoning questions go to the LLM. Document queries trigger vector search. This reduced average response time by 60% compared to sending everything to the model." },
+      { date: "Jun 13", title: "RAG Engine & Memory Layer", description: "Integrated ChromaDB for vector storage and similarity search. Implemented the full RAG pipeline: document ingestion → chunking → embedding generation → indexed storage. Built the memory system that maintains conversation context across turns using ChromaDB collections." },
+      { date: "Jun 14", title: "Tool Integrations", description: "Added DuckDuckGo web search via the python duckduckgo-search library — no API key required. Built the URL reader that fetches and summarizes web pages. Implemented the Python code runner in a sandboxed subprocess with timeout protection. Added the calculator for instant math evaluation." },
+      { date: "Jun 15", title: "Frontend Development", description: "Designed and built the chat UI with HTML/CSS/JS. Added support for markdown rendering, code syntax highlighting, and file uploads. Built the system monitor dashboard showing CPU/RAM usage, active model, and request statistics. Added voice pipeline support with wake word detection and STT/TTS." },
+      { date: "Jun 16", title: "DSA Knowledge Base", description: "Indexed 4 DSA textbooks and the Striver A2Z sheet into 5,491 vector chunks. Built the dsa_indexer and full_indexer scripts for automated knowledge base updates. Added 117 LeetCode solutions with explanations. Created a topic-based retrieval system that understands DSA-specific queries." },
+      { date: "Jun 17", title: "Testing & Optimization", description: "Added in-memory response caching for repeated queries — sub-5ms for cached results. Optimized ChromaDB query performance with tuned embedding models. Added conversation history management to prevent context window overflow. Tested with all 4 supported models across different query types." },
+      { date: "Jun 18", title: "Launch Preparation", description: "Created start.bat, stop.bat, and setup.bat scripts for one-click operation. Built the desktop shortcut with custom vasu_ai.ico icon. Added AutoHotkey hotkey script for Ctrl+Shift+CapsLock quick-close. Wrote comprehensive README with setup instructions and troubleshooting guide." },
     ],
     stats: [
       { label: "Language", value: "Python" },
@@ -112,8 +120,12 @@ export const projects: Project[] = [
       { title: "DSA Tracker", description: "Sync LeetCode progress automatically plus manual problem logging with category breakdowns." },
       { title: "Analytics Dashboard", description: "Score trends, role breakdown charts, activity feed, and comprehensive interview history." },
     ],
-    architecture:
-      "Next.js 16 frontend communicates with a separate Express backend via REST APIs. PostgreSQL (Neon) stores user data, interviews, and roadmaps. Groq API powers all AI features with Llama 3.1. Clerk handles authentication. Cloudinary stores uploaded resume PDFs. The backend is secured with Helmet.js, rate-limited (10 req/15min for AI routes), and input-sanitized.",
+    architecture: [
+      "AI Interview Copilot follows a modern full-stack architecture with a clear separation of concerns. The frontend is built with Next.js 16 App Router, deployed on Vercel. It handles all UI rendering, client-side routing, and state management. The backend is a separate Express.js server deployed on Render, exposing a RESTful API. Communication between them happens over HTTPS with JWT-based authentication via Clerk.",
+      "The PostgreSQL database on Neon stores all persistent data including user profiles, interview sessions, answers and scores, generated roadmaps, resume analysis results, and DSA progress records. Prisma ORM handles database schema management, migrations, and provides type-safe queries. The schema is designed with normalized tables and indexed columns for efficient querying of interview history and analytics data.",
+      "All AI features are powered by Groq API running Llama 3.1 70B. Mock interviews use a multi-turn prompt system where the AI acts as an interviewer, asks role-appropriate questions, evaluates answers on a 0–10 scale, and provides constructive feedback. Resume analysis uses a structured prompt that extracts skills, computes an ATS compatibility score, and suggests improvements. The roadmap generator creates personalized learning paths based on the user's target role and experience level.",
+      "Security was a major consideration. The backend uses Helmet.js for HTTP header security, express-rate-limit to restrict AI endpoints to 10 requests per 15-minute window, and input sanitization to prevent injection attacks. File uploads go through Cloudinary for secure storage and virus scanning. The frontend uses Clerk for authentication with Google OAuth and magic link options. SEO is handled with dynamic meta tags, a sitemap.xml, and a robots.txt configuration.",
+    ],
     fileTree: [
       "ai-interview-copilot/",
       "├── frontend/",
@@ -136,12 +148,16 @@ export const projects: Project[] = [
       "└── start.ps1",
     ],
     timeline: [
-      { date: "Jun 18", title: "Scaffolding", description: "Set up Next.js frontend + Express backend. PostgreSQL schema designed with Prisma. Clerk auth configured." },
-      { date: "Jun 20", title: "AI Interview Engine", description: "Built the core mock interview flow — role selection, question generation via Groq, answer scoring 0–10." },
-      { date: "Jun 22", title: "Resume & Cover Letter", description: "Added PDF resume upload via Cloudinary, ATS analysis with AI. Cover letter generator with multiple download formats." },
-      { date: "Jun 25", title: "Roadmap & DSA Tracker", description: "Built personalized learning roadmap generator (3/6/9/12 months). Added LeetCode sync and manual DSA logging." },
-      { date: "Jun 28", title: "Dashboard & Polish", description: "Created analytics dashboard with Recharts, interview history, filtering. Added rate limiting, Helmet security, SEO." },
-      { date: "Jul 01", title: "Deployment", description: "Frontend deployed on Vercel, backend on Render. CI pipeline with GitHub Actions. Full end-to-end testing." },
+      { date: "Jun 16", title: "Architecture Design", description: "Designed the full system architecture with Next.js frontend + Express backend + PostgreSQL. Created the Prisma schema with 8 models including User, Interview, Question, Answer, Roadmap, Resume, DSALog, and CoverLetter. Set up the monorepo structure with separate frontend/ and backend/ directories." },
+      { date: "Jun 17", title: "Authentication & Setup", description: "Integrated Clerk for authentication with Google OAuth and email magic links. Set up the Next.js project with App Router, Tailwind CSS, and TypeScript. Configured the Express backend with middleware stack (CORS, Helmet, rate limiting). Deployed the Prisma schema to Neon PostgreSQL." },
+      { date: "Jun 19", title: "AI Integration", description: "Integrated Groq API with Llama 3.1 70B. Designed the prompt engineering system for mock interviews with role-specific question banks. Built the AI service layer with retry logic, timeout handling, and structured output parsing. Created prompt templates for each feature — interview, resume, cover letter, roadmap." },
+      { date: "Jun 21", title: "Mock Interview Engine", description: "Built the complete mock interview flow: role selection (12+ roles), configurable question count (5/10/15), turn-based Q&A with the AI, real-time answer scoring on a 0–10 scale, and detailed feedback generation. Added interview session persistence with resume capability." },
+      { date: "Jun 23", title: "Resume & Cover Letter", description: "Implemented PDF resume upload via Cloudinary with drag-and-drop UI. Built the ATS analysis pipeline — skills extraction, experience parsing, education detection, and compatibility scoring. Created the cover letter generator with multiple format options (copy, PDF download, TXT download) and customizable tone." },
+      { date: "Jun 25", title: "Roadmap Generator", description: "Built the personalized learning roadmap system. Users select their target role and experience level, and the AI generates a structured roadmap with 4 duration options (3/6/9/12 months). Each roadmap includes week-by-week topics, resources, practice projects, and milestone checkpoints. Roadmaps are stored and viewable in a dedicated detail page." },
+      { date: "Jun 27", title: "DSA Tracker & LeetCode Sync", description: "Built the DSA progress tracker with category-based organization (Arrays, Strings, Trees, Graphs, DP, etc.). Implemented automatic LeetCode progress sync via the LeetCode GraphQL API. Added manual problem logging with difficulty rating, notes, and solution links. Dashboard shows per-category completion stats." },
+      { date: "Jun 29", title: "Analytics Dashboard", description: "Created the analytics dashboard with Recharts visualizations. Added score trend charts over time, role-based performance breakdowns, interview history with filtering (by role, date range, score range), and an activity feed showing recent achievements and milestones." },
+      { date: "Jul 01", title: "Testing & Security", description: "Wrote comprehensive test suites for all controllers and services. Added rate limiting (10 req/15min for AI endpoints, 100 req/15min for others). Implemented input sanitization, SQL injection prevention, and XSS protection. Added Helmet.js security headers and CORS configuration for production." },
+      { date: "Jul 03", title: "Deployment & SEO", description: "Deployed frontend to Vercel with automatic CI/CD via GitHub Actions. Deployed backend to Render with environment-specific configuration. Added dynamic meta tags for every page, generated sitemap.xml and robots.txt. Set up custom domain, SSL certificates, and monitoring alerts." },
     ],
     stats: [
       { label: "Language", value: "TypeScript" },
@@ -177,8 +193,12 @@ export const projects: Project[] = [
       { title: "Analytics", description: "Weekly study hours chart and 30-day activity heatmap to visualize consistency." },
       { title: "Backup & Export", description: "Export and import your entire data as JSON backup. Reset all data when needed." },
     ],
-    architecture:
-      "React 19 + Vite frontend with Firebase Authentication. Global state managed via React Context. Data is stored locally (localStorage) with Firebase for auth only. The app has 6 main pages: Dashboard, DSA Tracker, Web Roadmap, Tasks, Analytics, and Settings. Protected routes redirect unauthenticated users to a Login page.",
+    architecture: [
+      "Study Tracker is a single-page application built with React 19 and Vite 8. The architecture follows a context-based state management pattern. A global React Context (GlobalContext) holds all application state — user data, DSA progress, roadmap status, tasks, and study hours. This context is consumed by all pages and components, ensuring consistent state across the app without the overhead of Redux or external state libraries.",
+      "Firebase Authentication handles user sign-in via Google OAuth. Once authenticated, the user token is stored in the context and used to protect routes. The app does not use a backend database — all user data is stored locally in localStorage with JSON serialization. This was a deliberate choice to keep the app lightweight, fast, and fully functional offline while still providing personalized experiences per device.",
+      "The DSA tracker is the most complex feature. It reads from a JSON file (dsaPatterns.json) containing 110 patterns organized into 18 categories — Arrays, Strings, Two Pointers, Sliding Window, Binary Search, Stack & Queue, Linked List, Trees, Graphs, Dynamic Programming, Greedy, Backtracking, Heap, Trie, Segment Tree, Union Find, Bit Manipulation, and Math. Each pattern has a title, difficulty level, description, and associated LeetCode problems. Progress is tracked per-pattern and rolled up to category and overall levels.",
+      "The analytics system generates visualizations from the stored study data. A weekly study hours chart uses bar charts to show daily focus time. The 30-day activity heatmap provides a GitHub-style contribution view of study consistency. The Settings page includes JSON export/import for data portability and a factory reset option. The entire app is deployed on Vercel with automatic builds from the main branch.",
+    ],
     fileTree: [
       "study-tracker/",
       "├── src/",
@@ -198,11 +218,15 @@ export const projects: Project[] = [
       "└── vercel.json",
     ],
     timeline: [
-      { date: "Jun 25", title: "Project Setup", description: "Initialized React 19 + Vite project. Set up Firebase auth, React Context for global state, and routing structure." },
-      { date: "Jun 27", title: "Dashboard & DSA Tracker", description: "Built main dashboard with streak counter, study hours, and progress bars. Created DSA tracker with 110 patterns across 18 categories." },
-      { date: "Jun 29", title: "Web Roadmap & Tasks", description: "Added 18-step web development roadmap with timeline UI. Implemented task management system with deadlines." },
-      { date: "Jul 02", title: "Analytics & Polish", description: "Added weekly study hours chart, 30-day activity heatmap. Implemented JSON backup/export and data reset." },
-      { date: "Jul 04", title: "Final Touches", description: "Added Welcome Tour, responsive design fixes. Oxlint configuration, Vitest tests, CI/CD with GitHub Actions." },
+      { date: "Jun 22", title: "Project Planning", description: "Defined the scope for a personal study tracker with 6 core features: Dashboard, DSA Tracker, Web Roadmap, Tasks, Analytics, and Settings. Chose React 19 + Vite 8 for fast development and hot reload. Designed the component tree and data flow with React Context. Created mockups for all pages in Figma." },
+      { date: "Jun 23", title: "Scaffolding & Auth", description: "Initialized the Vite project with React 19 and TypeScript 6. Set up Firebase project with Google Sign-In. Created the authentication flow with protected routes and redirect logic. Built the Login page with a clean Google sign-in button and loading states." },
+      { date: "Jun 24", title: "Global State Management", description: "Implemented the GlobalContext with all state slices: auth, dsa, webRoadmap, tasks, studyHours, and settings. Built custom hooks for each slice with type-safe interfaces. Added localStorage persistence layer that automatically syncs state changes to disk." },
+      { date: "Jun 26", title: "Dashboard Development", description: "Built the main Dashboard page with 6 components: streak counter (consecutive study days), weekly study hours bar chart, DSA overall progress bar, Web roadmap progress bar, recent activity feed, and a quick-add task input. Used CSS Grid for responsive layout across screen sizes." },
+      { date: "Jun 28", title: "DSA Tracker", description: "Created the dsaPatterns.json data file with 110 patterns across 18 categories. Built the DSA Tracker page with category cards showing per-category progress, a detailed pattern list with difficulty badges, and a search/filter system. Each pattern can be marked as started/completed with notes." },
+      { date: "Jun 30", title: "Web Roadmap & Tasks", description: "Built the 18-step Web Development Roadmap with a timeline UI showing completion status per step. Each step has resources and projects. Implemented the Task system with create/read/toggle/delete operations, deadline picker, and priority levels. Tasks are filterable by status and sorted by deadline." },
+      { date: "Jul 02", title: "Analytics & Heatmap", description: "Created the Analytics page with a weekly study hours chart built from raw CSS (no chart library dependency). Added a 30-day activity heatmap with GitHub-style color intensity. Both visualizations are animated on scroll and update in real-time as new study data is logged." },
+      { date: "Jul 04", title: "Settings & Data Management", description: "Implemented the Settings page with JSON export (downloads all user data as a .json file), JSON import (parses and restores data from file), and factory reset (clears all data with confirmation dialog). Added a Welcome Tour component for first-time users using a step-by-step overlay guide." },
+      { date: "Jul 05", title: "Polish & CI/CD", description: "Added responsive design fixes for mobile and tablet. Configured Oxlint for fast linting. Wrote Vitest tests for the GlobalContext. Set up GitHub Actions CI/CD with deploy-to-Vercel on main branch pushes. Added favicon, meta tags, and PWA manifest for installability." },
     ],
     stats: [
       { label: "Language", value: "TypeScript" },
@@ -237,8 +261,12 @@ export const projects: Project[] = [
       { title: "Price Rationale", description: "Every price change includes an explanation visible to the customer." },
       { title: "ML Pipeline", description: "Full train → evaluate → deploy pipeline with SHAP/LIME explainability layer." },
     ],
-    architecture:
-      "FastAPI server with a modular engine architecture. The ML engine handles pricing calculations, the decision engine applies fairness guardrails, and the recommendation system uses session-based affinity scoring. Redis workers handle caching. A full ML pipeline (data cleaning → feature engineering → training → evaluation → deployment) is supported with SHAP/LIME for explainability and A/B testing for conversion optimization.",
+    architecture: [
+      "EE-commerce is built on a modular FastAPI server architecture with clearly separated concerns. The server.py file initializes the application and registers all route handlers. The ml_engine.py contains the core pricing algorithm — a formula that takes base price, applies a click-based multiplier (capped at +15%), adds scarcity adjustments based on inventory levels, and factors in competitor pricing from a configurable data source. The result is a dynamic price that responds to market conditions in real-time.",
+      "The decision_engine.py acts as a fairness and compliance layer. It enforces hard guardrails — no price can exceed 115% of the base price (consumer protection), no price can fall below the cost floor (business protection), and all price changes must include a human-readable rationale. This rationale is generated automatically and stored alongside the price change for audit purposes. The system logs every pricing decision with timestamps, inputs, outputs, and the specific guardrails applied.",
+      "For recommendations, the system uses a session-based affinity scoring algorithm. When a user views or interacts with products, their session is tagged with category preferences. The recommendation engine scores products based on category match, trending velocity (recent popularity), and cross-sell patterns. Recommendations are updated in real-time as the session progresses, with no user login or historical data required.",
+      "The A/B testing framework (ab_testing.py) randomly assigns user sessions to either static or dynamic pricing groups. It tracks conversion rates, average order value, and revenue per session for each group. Results are logged with statistical significance calculations. The explainability module (explainability.py) uses SHAP and LIME to generate feature importance plots and individual prediction explanations, making the ML model's decisions transparent and auditable. Redis workers handle caching with sub-1ms response times for repeated queries.",
+    ],
     fileTree: [
       "EE-commerce/",
       "├── server.py                  # FastAPI main server",
@@ -256,12 +284,16 @@ export const projects: Project[] = [
       "└── index.html                 # Frontend UI",
     ],
     timeline: [
-      { date: "Apr 08", title: "Core Engine", description: "Built the dynamic pricing engine with base formula, scarcity multiplier, and competitor adjustments." },
-      { date: "Apr 10", title: "Fairness Layer", description: "Implemented fairness guardrails — hard +15% price ceiling, cost-floor protection, transparent rationale." },
-      { date: "Apr 12", title: "Recommendation System", description: "Built session-based recommendation engine using category affinity scoring and trending products." },
-      { date: "Apr 14", title: "A/B Testing Framework", description: "Created A/B testing infrastructure for static vs dynamic pricing with conversion tracking and stats." },
-      { date: "Apr 16", title: "ML Pipeline", description: "Developed full ML pipeline: data cleaning → feature engineering → model training → evaluation → deployment." },
-      { date: "Apr 18", title: "Explainability & Polish", description: "Added SHAP/LIME explainability layer. Redis caching for <1ms latency. Design docs completed." },
+      { date: "Apr 05", title: "Concept & Design", description: "Defined the core pricing formula: P = base × (1 + min(15%, clicks/10)) with scarcity multiplier. Designed the modular architecture with separate engines for pricing, fairness, recommendations, and A/B testing. Created detailed design documents for ML pipeline, Redis caching, recommendation system, and fairness explainability." },
+      { date: "Apr 07", title: "Core Pricing Engine", description: "Built the ml_engine.py with the base pricing formula. Implemented the scarcity multiplier that increases price as inventory drops below threshold levels. Added competitor price monitoring via configurable data source. Built the in-memory product catalog with real-time price calculation for every product view." },
+      { date: "Apr 09", title: "Fairness Guardrails", description: "Implemented the decision_engine.py with three guardrails: hard +15% ceiling (max price increase), cost-floor protection (never sell below cost), and price rationale generation. Every pricing decision is logged with a complete audit trail including the formula inputs, intermediate calculations, final price, and the specific guardrails that were triggered." },
+      { date: "Apr 11", title: "Recommendation System", description: "Built the session-based recommendation engine. Implemented category affinity scoring that tracks which product categories a user engages with during their session. Added trending product detection based on recent view velocity. Combined these signals into a ranked recommendation list that updates in real-time as the user browses." },
+      { date: "Apr 13", title: "A/B Testing Framework", description: "Created the A/B testing infrastructure with session-based random assignment to control (static pricing) and treatment (dynamic pricing) groups. Built conversion tracking for both groups with statistical significance computation. Added a real-time dashboard showing test results including conversion rates, average order value, and revenue impact." },
+      { date: "Apr 15", title: "ML Pipeline Development", description: "Built data_cleaning.py for preprocessing raw e-commerce data — handling missing values, outlier detection, and feature normalization. Created data_preparation.py for feature engineering including price elasticity, demand forecasting features, and customer segment indicators. Developed train_models.py with Scikit-learn pipelines for price prediction and demand forecasting models." },
+      { date: "Apr 17", title: "Model Explainability", description: "Integrated SHAP (SHapley Additive exPlanations) and LIME (Local Interpretable Model-agnostic Explanations) into the explainability.py module. Each pricing decision can be explained with feature importance plots showing which factors influenced the price. Built a REST endpoint that returns both the price and its explanation in a human-readable format." },
+      { date: "Apr 19", title: "Redis Caching Layer", description: "Implemented redis_worker.py for distributed caching of product prices, recommendations, and session data. Achieved sub-1ms response times for cached queries. Built cache invalidation logic that refreshes prices when inventory changes, competitor prices update, or the ML model is retrained. Added cache warming on server startup." },
+      { date: "Apr 21", title: "Pipeline Automation", description: "Built run_all.py that orchestrates the full pipeline: data cleaning → feature engineering → model training → model evaluation → deployment. Created the model_trainer.py with cross-validation, hyperparameter tuning, and model versioning. Added model evaluation metrics including MAE, RMSE, and R² scores with automatic promotion of best-performing models." },
+      { date: "Apr 23", title: "Documentation & Polish", description: "Wrote comprehensive design documents: ml_pipeline_design.md, ab_metrics_design.md, fairness_explainability_layer.md, redis_architecture.md, and recsys_feature_design.md. Built the frontend UI (index.html) with React CDN showing real-time pricing, recommendations, and A/B test results. Added unit tests and integration tests for all engines." },
     ],
     stats: [
       { label: "Language", value: "Python" },

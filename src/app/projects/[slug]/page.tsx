@@ -7,9 +7,7 @@ import ProjectBgPattern from "@/components/ProjectBgPattern";
 import MouseFollower from "@/components/MouseFollower";
 import FloatingOrbs from "@/components/FloatingOrbs";
 
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
